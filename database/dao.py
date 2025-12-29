@@ -33,13 +33,11 @@ class DAO:
 
         query = """ SELECT *
                     FROM gene g 
-                    WHERE g.cromosoma > 0"""
+                    WHERE g.cromosoma != 0"""
         cursor.execute(query)
         for row in cursor:
             lista_cromosomi.add(row['cromosoma'])
             map_geni[row['id']] = row['cromosoma']
-        print(lista_cromosomi)
-        print(map_geni)
 
         cursor.close()
         conn.close()
@@ -53,6 +51,25 @@ class DAO:
             print(e)
 
         cursor = conn.cursor(dictionary=True)
-        query = """ SELECT *
-        FROM interazioni """
+        query = """ WITH Tabella AS (
+                    SELECT distinct gx.cromosoma as Cromosoma1, gy.cromosoma as Cromosoma2, i.correlazione
+                    FROM interazione i, gene gx, gene gy
+                    WHERE i.id_gene1 = gx.id and i.id_gene2 = gy.id
+                        and gx.cromosoma != 0  and gy.cromosoma != 0
+                        and gx.cromosoma != gy.cromosoma 
+                    GROUP  BY gx.cromosoma, gy.cromosoma, i.correlazione
+                    )
+                    SELECT t.Cromosoma1, t.Cromosoma2, sum(t.correlazione ) as peso
+                    FROM Tabella t
+                    GROUP BY t.Cromosoma1 , t.Cromosoma2 
+                """
+
         cursor.execute(query)
+        result = []
+        for row in cursor:
+            arco = (row['Cromosoma1'], row['Cromosoma2'], float(row['peso']))
+            result.append(arco)
+        cursor.close()
+        conn.close()
+
+        return result

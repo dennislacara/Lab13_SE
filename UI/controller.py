@@ -46,9 +46,33 @@ class Controller:
             print('lista_visualizzazione_2 aggiornata nella UI')
 
         else:
-            self._view.show_alert(f'Soglia non valida;\nIl valore è di tipo: {"Numerico" if input_Conta_archi.isdigit() else "Non numerico"}')
+            self._view.show_alert(f'Soglia non valida;\nIl valore è di tipo: {"Numerico" if input_Conta_archi.isdigit() else "Non numerico"};\nSoglia compresa tra 3 e 7!!!')
         # TODO
 
     def handle_ricerca(self, e):
         """ Handler per gestire il problema ricorsivo di ricerca del cammino """""
+        if not self._model.archi_soglia:
+            self._view.show_alert('Impostare una soglia')
+            return
+
+        #eseguo la ricerca del percorso piu pesante ed estraggo i dati utili
+        percorso, peso = self._model.best_arco_()
+        print(percorso, peso)
+        lunghezza = len(percorso) - 1
+
+        self._view.lista_visualizzazione_3.controls.clear()
+        self._view.lista_visualizzazione_3.controls.append(ft.Text(f'Numero di archi percorso più lungo: {lunghezza}'))
+        self._view.lista_visualizzazione_3.controls.append(ft.Text(f'Peso cammino massimo: {peso}'))
+        for i in range(len(percorso)-1):
+            partenza = percorso[i]
+            arrivo = percorso[i+1]
+            grafo = self._model.G
+            peso_arco = grafo[partenza][arrivo]['peso']
+
+            self._view.lista_visualizzazione_3.controls.append(ft.Text(f'{partenza} --> {arrivo} : {peso_arco}'))
+        self._view.update()
+
+
+
+
         # TODO

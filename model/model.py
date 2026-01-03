@@ -1,3 +1,4 @@
+
 import networkx as nx
 from database.dao import DAO
 
@@ -10,6 +11,7 @@ class Model:
 
         self.interazioni = None
 
+        self.archi_soglia = None
 
         self.load_geni()
         self.load_interazioni()
@@ -50,4 +52,48 @@ class Model:
                 lista_minori.append(arco)
             if peso > S:
                 lista_maggiori.append(arco)
+                #incremento di una lista del Model che contiene gli archi superiori alla soglia
+                if not self.archi_soglia:
+                    self.archi_soglia = [arco]
+                else:
+                    self.archi_soglia.append(arco)
         return len(lista_minori), len(lista_maggiori)
+
+    def best_arco_(self):
+        #creo un grafo relativo con gli archi validi
+        grafo = nx.DiGraph()
+        for arco in self.archi_soglia:
+            grafo.add_edge(arco[0], arco[1], peso=arco[2])
+
+        self.best_arco = []
+        self.peso_ottimo = float('-inf')
+        self.ricorsione(grafo, grafo.nodes, [])
+
+        return self.best_arco, self.peso_ottimo
+
+    def ricorsione(self,grafo, nodi, l_parziale):
+        if len(l_parziale)>=2:
+            peso = nx.path_weight(grafo, l_parziale, 'peso')
+            if peso > self.peso_ottimo:
+                self.best_arco = l_parziale.copy()
+                self.peso_ottimo = peso
+                print(self.best_arco)
+                print(self.peso_ottimo)
+
+        for nodo in nodi:
+
+            #caso in cui c'è un incrocio e si ripete un nodo
+            if nodo in l_parziale:
+                l_parziale.append(nodo)
+                v = list(nx.neighbors(grafo, nodo))
+                vicini = [vicino for vicino in v if vicino not in l_parziale]
+
+            #caso semplice
+            else:
+                l_parziale.append(nodo)
+                vicini = list(nx.neighbors(grafo, nodo))
+
+            #ricorsione
+            self.ricorsione(grafo, vicini, l_parziale)
+            #backtracking
+            l_parziale.pop(-1)

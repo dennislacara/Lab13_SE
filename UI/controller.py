@@ -72,7 +72,4 @@ class Controller:
             self._view.lista_visualizzazione_3.controls.append(ft.Text(f'{partenza} --> {arrivo} : {peso_arco}'))
         self._view.update()
 
-
-
-
         # TODO

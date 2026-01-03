@@ -11,7 +11,6 @@ class Model:
 
         self.interazioni = None
 
-        self.archi_soglia = None
 
         self.load_geni()
         self.load_interazioni()
@@ -44,6 +43,7 @@ class Model:
         return min, max
 
     def conta_archi(self, S):
+        self.archi_soglia = None
         lista_minori = []
         lista_maggiori = []
         for arco in self.G.edges.data('peso'):
